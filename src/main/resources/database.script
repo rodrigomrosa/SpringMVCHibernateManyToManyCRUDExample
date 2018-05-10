@@ -12,177 +12,271 @@ CREATE DATABASE websystique
     CONNECTION LIMIT = -1;
     
     
-CREATE TABLE "public"."app_user"
-(
-   id bigint PRIMARY KEY NOT NULL,
-   sso_id varchar(30) NOT NULL,
-   password varchar(100) NOT NULL,
-   first_name varchar(30) NOT NULL,
-   last_name varchar(30) NOT NULL,
-   email varchar(30) NOT NULL
-)
-;
-CREATE TABLE "public"."app_user_user_profile"
-(
-   user_id bigint NOT NULL,
-   user_profile_id bigint NOT NULL,
-   CONSTRAINT app_user_user_profile_pkey PRIMARY KEY (user_id,user_profile_id)
-)
-;
-CREATE TABLE "public"."persistent_logins"
-(
-   username varchar(64) NOT NULL,
-   series varchar(64) PRIMARY KEY NOT NULL,
-   token varchar(64) NOT NULL,
-   last_used timestamp NOT NULL
-)
-;
-CREATE TABLE "public"."user_profile"
-(
-   id bigint PRIMARY KEY NOT NULL,
-   type varchar(30) NOT NULL
-)
-;
-CREATE UNIQUE INDEX app_user_pkey ON "public"."app_user"(id)
-;
-CREATE UNIQUE INDEX app_user_sso_id_key ON "public"."app_user"(sso_id)
-;
-ALTER TABLE "public"."app_user_user_profile"
-ADD CONSTRAINT fk_app_user
-FOREIGN KEY (user_id)
-REFERENCES "public"."app_user"(id)
-;
-ALTER TABLE "public"."app_user_user_profile"
-ADD CONSTRAINT fk_user_profile
-FOREIGN KEY (user_profile_id)
-REFERENCES "public"."user_profile"(id)
-;
-CREATE UNIQUE INDEX app_user_user_profile_pkey ON "public"."app_user_user_profile"
-(
-  user_id,
-  user_profile_id
-)
-;
-CREATE UNIQUE INDEX persistent_logins_pkey ON "public"."persistent_logins"(series)
-;
-CREATE UNIQUE INDEX user_profile_type_key ON "public"."user_profile"(type)
-;
-CREATE UNIQUE INDEX user_profile_pkey ON "public"."user_profile"(id)
-;
+
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 10.0
+-- Dumped by pg_dump version 10.0
+
+-- Started on 2018-05-09 21:47:38
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- TOC entry 1 (class 3079 OID 12924)
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
 
--------------
+--
+-- TOC entry 2833 (class 0 OID 0)
+-- Dependencies: 1
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
-CREATE SEQUENCE public.app_user_seq
-    INCREMENT 1
-    START 2
-    MINVALUE 1
-    MAXVALUE 9223372036854775807
+SET search_path = public, pg_catalog;
+
+--
+-- TOC entry 197 (class 1259 OID 16408)
+-- Name: app_user_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE app_user_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE public.app_user_seq
-    OWNER TO postgres;
+
+ALTER TABLE app_user_seq OWNER TO postgres;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- TOC entry 196 (class 1259 OID 16401)
+-- Name: app_user; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE app_user (
+    id bigint DEFAULT nextval('app_user_seq'::regclass) NOT NULL,
+    sso_id character varying(30) NOT NULL,
+    password character varying(100) NOT NULL,
+    first_name character varying(30) NOT NULL,
+    last_name character varying(30) NOT NULL,
+    email character varying(30) NOT NULL
+);
 
 
-CREATE SEQUENCE public.user_profile_seq
-    INCREMENT 1
-    START 3
-    MINVALUE 1
-    MAXVALUE 9223372036854775807
-    CACHE 1;
+ALTER TABLE app_user OWNER TO postgres;
 
-ALTER SEQUENCE public.user_profile_seq
-    OWNER TO postgres;
-    
-    
--- Table: public.app_user
+--
+-- TOC entry 199 (class 1259 OID 16418)
+-- Name: app_user_user_profile; Type: TABLE; Schema: public; Owner: postgres
+--
 
--- DROP TABLE public.app_user;
-
-CREATE TABLE public.app_user
-(
-    id bigint NOT NULL DEFAULT nextval('app_user_seq'::regclass),
-    sso_id character varying(30) COLLATE pg_catalog."default" NOT NULL,
-    password character varying(100) COLLATE pg_catalog."default" NOT NULL,
-    first_name character varying(30) COLLATE pg_catalog."default" NOT NULL,
-    last_name character varying(30) COLLATE pg_catalog."default" NOT NULL,
-    email character varying(30) COLLATE pg_catalog."default" NOT NULL,
-    CONSTRAINT app_user_pkey PRIMARY KEY (id),
-    CONSTRAINT app_user_sso_id_key UNIQUE (sso_id)
-)
-WITH (
-    OIDS = FALSE
-)
-TABLESPACE pg_default;
-
-ALTER TABLE public.app_user
-    OWNER to postgres;
-    
-    
--- Table: public.app_user_user_profile
-
--- DROP TABLE public.app_user_user_profile;
-
-CREATE TABLE public.app_user_user_profile
-(
+CREATE TABLE app_user_user_profile (
     user_id bigint NOT NULL,
-    user_profile_id bigint NOT NULL,
-    CONSTRAINT app_user_user_profile_pkey PRIMARY KEY (user_id, user_profile_id),
-    CONSTRAINT fk_app_user FOREIGN KEY (user_id)
-        REFERENCES public.app_user (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION,
-    CONSTRAINT fk_user_profile FOREIGN KEY (user_profile_id)
-        REFERENCES public.user_profile (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-)
-WITH (
-    OIDS = FALSE
-)
-TABLESPACE pg_default;
+    user_profile_id bigint NOT NULL
+);
 
-ALTER TABLE public.app_user_user_profile
-    OWNER to postgres;
+
+ALTER TABLE app_user_user_profile OWNER TO postgres;
+
+--
+-- TOC entry 201 (class 1259 OID 16436)
+-- Name: persistent_logins; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE persistent_logins (
+    username character varying(64) NOT NULL,
+    series character varying(64) NOT NULL,
+    token character varying(64) NOT NULL,
+    last_used timestamp without time zone NOT NULL
+);
+
+
+ALTER TABLE persistent_logins OWNER TO postgres;
+
+--
+-- TOC entry 200 (class 1259 OID 16433)
+-- Name: user_profile_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE user_profile_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE user_profile_seq OWNER TO postgres;
+
+--
+-- TOC entry 198 (class 1259 OID 16411)
+-- Name: user_profile; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE user_profile (
+    id bigint DEFAULT nextval('user_profile_seq'::regclass) NOT NULL,
+    type character varying(30) NOT NULL
+);
+
+
+ALTER TABLE user_profile OWNER TO postgres;
+
+--
+-- TOC entry 2821 (class 0 OID 16401)
+-- Dependencies: 196
+-- Data for Name: app_user; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY app_user (id, sso_id, password, first_name, last_name, email) FROM stdin;
+1	sam	$2a$10$4eqIF5s/ewJwHK1p8lqlFOEm2QIA0S8g6./Lok.pQxqcxaBZYChRm	Sam	Smith	samy@xyz.com
+2	user	$2a$10$XPD57bYCVOkxkJTeDtCcD.av1EIQ7p6WJK5DXH.39MaDY4TsmWJgy	User	User	user@user3.com
+\.
+
+
+--
+-- TOC entry 2824 (class 0 OID 16418)
+-- Dependencies: 199
+-- Data for Name: app_user_user_profile; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY app_user_user_profile (user_id, user_profile_id) FROM stdin;
+1	2
+2	2
+2	3
+2	1
+\.
+
+
+
+
+--
+-- TOC entry 2823 (class 0 OID 16411)
+-- Dependencies: 198
+-- Data for Name: user_profile; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY user_profile (id, type) FROM stdin;
+1	USER
+2	ADMIN
+3	DBA
+\.
+
+
+--
+-- TOC entry 2834 (class 0 OID 0)
+-- Dependencies: 197
+-- Name: app_user_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('app_user_seq', 2, true);
+
+
+--
+-- TOC entry 2835 (class 0 OID 0)
+-- Dependencies: 200
+-- Name: user_profile_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('user_profile_seq', 3, true);
+
+
+--
+-- TOC entry 2687 (class 2606 OID 16405)
+-- Name: app_user app_user_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY app_user
+    ADD CONSTRAINT app_user_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2689 (class 2606 OID 16407)
+-- Name: app_user app_user_sso_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY app_user
+    ADD CONSTRAINT app_user_sso_id_key UNIQUE (sso_id);
+
+
+--
+-- TOC entry 2695 (class 2606 OID 16422)
+-- Name: app_user_user_profile app_user_user_profile_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY app_user_user_profile
+    ADD CONSTRAINT app_user_user_profile_pkey PRIMARY KEY (user_id, user_profile_id);
+
+
+--
+-- TOC entry 2697 (class 2606 OID 16440)
+-- Name: persistent_logins persistent_logins_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY persistent_logins
+    ADD CONSTRAINT persistent_logins_pkey PRIMARY KEY (series);
+
+
+--
+-- TOC entry 2691 (class 2606 OID 16415)
+-- Name: user_profile user_profile_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY user_profile
+    ADD CONSTRAINT user_profile_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2693 (class 2606 OID 16417)
+-- Name: user_profile user_profile_type_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY user_profile
+    ADD CONSTRAINT user_profile_type_key UNIQUE (type);
+
+
+--
+-- TOC entry 2698 (class 2606 OID 16423)
+-- Name: app_user_user_profile fk_app_user; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY app_user_user_profile
+    ADD CONSTRAINT fk_app_user FOREIGN KEY (user_id) REFERENCES app_user(id);
+
+
+--
+-- TOC entry 2699 (class 2606 OID 16428)
+-- Name: app_user_user_profile fk_user_profile; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY app_user_user_profile
+    ADD CONSTRAINT fk_user_profile FOREIGN KEY (user_profile_id) REFERENCES user_profile(id);
+
+
+-- Completed on 2018-05-09 21:47:38
+
+--
+-- PostgreSQL database dump complete
+--
+
     
-    
--- Table: public.persistent_logins
-
--- DROP TABLE public.persistent_logins;
-
-CREATE TABLE public.persistent_logins
-(
-    username character varying(64) COLLATE pg_catalog."default" NOT NULL,
-    series character varying(64) COLLATE pg_catalog."default" NOT NULL,
-    token character varying(64) COLLATE pg_catalog."default" NOT NULL,
-    last_used timestamp without time zone NOT NULL,
-    CONSTRAINT persistent_logins_pkey PRIMARY KEY (series)
-)
-WITH (
-    OIDS = FALSE
-)
-TABLESPACE pg_default;
-
-ALTER TABLE public.persistent_logins
-    OWNER to postgres;
-    
-    
--- Table: public.user_profile
-
--- DROP TABLE public.user_profile;
-
-CREATE TABLE public.user_profile
-(
-    id bigint NOT NULL DEFAULT nextval('user_profile_seq'::regclass),
-    type character varying(30) COLLATE pg_catalog."default" NOT NULL,
-    CONSTRAINT user_profile_pkey PRIMARY KEY (id),
-    CONSTRAINT user_profile_type_key UNIQUE (type)
-)
-WITH (
-    OIDS = FALSE
-)
-TABLESPACE pg_default;
-
-ALTER TABLE public.user_profile
-    OWNER to postgres;
