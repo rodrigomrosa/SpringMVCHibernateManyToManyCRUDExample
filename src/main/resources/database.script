@@ -1,0 +1,188 @@
+-- Database: websystique
+
+-- DROP DATABASE websystique;
+
+CREATE DATABASE websystique
+    WITH 
+    OWNER = postgres
+    ENCODING = 'UTF8'
+    LC_COLLATE = 'Portuguese_Brazil.1252'
+    LC_CTYPE = 'Portuguese_Brazil.1252'
+    TABLESPACE = pg_default
+    CONNECTION LIMIT = -1;
+    
+    
+CREATE TABLE "public"."app_user"
+(
+   id bigint PRIMARY KEY NOT NULL,
+   sso_id varchar(30) NOT NULL,
+   password varchar(100) NOT NULL,
+   first_name varchar(30) NOT NULL,
+   last_name varchar(30) NOT NULL,
+   email varchar(30) NOT NULL
+)
+;
+CREATE TABLE "public"."app_user_user_profile"
+(
+   user_id bigint NOT NULL,
+   user_profile_id bigint NOT NULL,
+   CONSTRAINT app_user_user_profile_pkey PRIMARY KEY (user_id,user_profile_id)
+)
+;
+CREATE TABLE "public"."persistent_logins"
+(
+   username varchar(64) NOT NULL,
+   series varchar(64) PRIMARY KEY NOT NULL,
+   token varchar(64) NOT NULL,
+   last_used timestamp NOT NULL
+)
+;
+CREATE TABLE "public"."user_profile"
+(
+   id bigint PRIMARY KEY NOT NULL,
+   type varchar(30) NOT NULL
+)
+;
+CREATE UNIQUE INDEX app_user_pkey ON "public"."app_user"(id)
+;
+CREATE UNIQUE INDEX app_user_sso_id_key ON "public"."app_user"(sso_id)
+;
+ALTER TABLE "public"."app_user_user_profile"
+ADD CONSTRAINT fk_app_user
+FOREIGN KEY (user_id)
+REFERENCES "public"."app_user"(id)
+;
+ALTER TABLE "public"."app_user_user_profile"
+ADD CONSTRAINT fk_user_profile
+FOREIGN KEY (user_profile_id)
+REFERENCES "public"."user_profile"(id)
+;
+CREATE UNIQUE INDEX app_user_user_profile_pkey ON "public"."app_user_user_profile"
+(
+  user_id,
+  user_profile_id
+)
+;
+CREATE UNIQUE INDEX persistent_logins_pkey ON "public"."persistent_logins"(series)
+;
+CREATE UNIQUE INDEX user_profile_type_key ON "public"."user_profile"(type)
+;
+CREATE UNIQUE INDEX user_profile_pkey ON "public"."user_profile"(id)
+;
+
+
+-------------
+
+
+CREATE SEQUENCE public.app_user_seq
+    INCREMENT 1
+    START 2
+    MINVALUE 1
+    MAXVALUE 9223372036854775807
+    CACHE 1;
+
+ALTER SEQUENCE public.app_user_seq
+    OWNER TO postgres;
+
+
+CREATE SEQUENCE public.user_profile_seq
+    INCREMENT 1
+    START 3
+    MINVALUE 1
+    MAXVALUE 9223372036854775807
+    CACHE 1;
+
+ALTER SEQUENCE public.user_profile_seq
+    OWNER TO postgres;
+    
+    
+-- Table: public.app_user
+
+-- DROP TABLE public.app_user;
+
+CREATE TABLE public.app_user
+(
+    id bigint NOT NULL DEFAULT nextval('app_user_seq'::regclass),
+    sso_id character varying(30) COLLATE pg_catalog."default" NOT NULL,
+    password character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    first_name character varying(30) COLLATE pg_catalog."default" NOT NULL,
+    last_name character varying(30) COLLATE pg_catalog."default" NOT NULL,
+    email character varying(30) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT app_user_pkey PRIMARY KEY (id),
+    CONSTRAINT app_user_sso_id_key UNIQUE (sso_id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public.app_user
+    OWNER to postgres;
+    
+    
+-- Table: public.app_user_user_profile
+
+-- DROP TABLE public.app_user_user_profile;
+
+CREATE TABLE public.app_user_user_profile
+(
+    user_id bigint NOT NULL,
+    user_profile_id bigint NOT NULL,
+    CONSTRAINT app_user_user_profile_pkey PRIMARY KEY (user_id, user_profile_id),
+    CONSTRAINT fk_app_user FOREIGN KEY (user_id)
+        REFERENCES public.app_user (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fk_user_profile FOREIGN KEY (user_profile_id)
+        REFERENCES public.user_profile (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public.app_user_user_profile
+    OWNER to postgres;
+    
+    
+-- Table: public.persistent_logins
+
+-- DROP TABLE public.persistent_logins;
+
+CREATE TABLE public.persistent_logins
+(
+    username character varying(64) COLLATE pg_catalog."default" NOT NULL,
+    series character varying(64) COLLATE pg_catalog."default" NOT NULL,
+    token character varying(64) COLLATE pg_catalog."default" NOT NULL,
+    last_used timestamp without time zone NOT NULL,
+    CONSTRAINT persistent_logins_pkey PRIMARY KEY (series)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public.persistent_logins
+    OWNER to postgres;
+    
+    
+-- Table: public.user_profile
+
+-- DROP TABLE public.user_profile;
+
+CREATE TABLE public.user_profile
+(
+    id bigint NOT NULL DEFAULT nextval('user_profile_seq'::regclass),
+    type character varying(30) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT user_profile_pkey PRIMARY KEY (id),
+    CONSTRAINT user_profile_type_key UNIQUE (type)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public.user_profile
+    OWNER to postgres;
